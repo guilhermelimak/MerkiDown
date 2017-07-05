@@ -30,9 +30,9 @@ export default {
     const filesRef = database.ref().child(`files/${saveId}`);
     filesRef.update({ contentHtml, contentMd });
   },
-  getEditContent(editUrl) {
+  getEditContent(editKey) {
     let contentKey = '';
-    const refHashUrl = database.ref(`hash/${editUrl}`);
+    const refHashUrl = database.ref(`hash/${editKey}`);
     return new Promise((resolve, reject) => {
       refHashUrl.once('value', (hashSnapshot) => {
         contentKey = hashSnapshot.val();
@@ -45,9 +45,9 @@ export default {
           resolve({
             htmlValue: contentSnapshot.val().contentHtml,
             mdValue: contentSnapshot.val().contentMd,
-            publishUrl: refContentUrl.key,
+            publishKey: refContentUrl.key,
             saveId: refContentUrl.key,
-            editUrl,
+            editKey,
           });
         });
       });
