@@ -22,8 +22,8 @@ export default {
     filesRef.set({ contentHtml, contentMd });
     hashRef.set(filesRef.key);
     return {
-      publishUrlKey: filesRef.key,
-      editUrlHash: hashGenerated,
+      publishKey: filesRef.key,
+      editHash: hashGenerated,
     };
   },
   save(contentHtml, contentMd, saveId) {
@@ -33,11 +33,15 @@ export default {
   getEditContent(editUrl) {
     let contentKey = '';
     const refHashUrl = database.ref(`hash/${editUrl}`);
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       refHashUrl.once('value', (hashSnapshot) => {
         contentKey = hashSnapshot.val();
         const refContentUrl = database.ref(`files/${contentKey}`);
         refContentUrl.once('value', (contentSnapshot) => {
+          if (!contentSnapshot || !contentSnapshot.val()) {
+            reject('Error');
+            return;
+          }
           resolve({
             htmlValue: contentSnapshot.val().contentHtml,
             mdValue: contentSnapshot.val().contentMd,
