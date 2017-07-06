@@ -53,4 +53,16 @@ export default {
       });
     });
   },
+  showSaved(publishedUrl) {
+    const ref = database.ref(`files/${publishedUrl}`);
+    return new Promise((resolve, reject) => {
+      ref.once('value', (snapshot) => {
+        if (!snapshot || !snapshot.val()) {
+          reject('Error');
+          return;
+        }
+        resolve(snapshot.val().contentHtml);
+      });
+    });
+  },
 };
