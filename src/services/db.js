@@ -14,22 +14,22 @@ firebase.initializeApp(config);
 const database = firebase.database();
 
 export default {
-  publishDocument(htmlValue, msValue) {
+  createDocument(htmlValue, mdValue) {
     const filesRef = database.ref().child('files').push();
     const editKey = hash();
     const hashRef = database.ref().child(`hash/${editKey}`);
 
-    filesRef.set({ htmlValue, msValue });
+    filesRef.set({ htmlValue, mdValue });
     hashRef.set(filesRef.key);
 
     return {
       editKey,
-      publishKey: filesRef.key,
+      id: filesRef.key,
     };
   },
-  saveDocument(htmlValue, msValue, publishedId) {
-    const filesRef = database.ref().child(`files/${publishedId}`);
-    filesRef.update({ htmlValue, msValue });
+  updateDocument(htmlValue, mdValue, id) {
+    const fileRef = database.ref().child(`files/${id}`);
+    fileRef.update({ htmlValue, mdValue });
   },
   findDocumentByEditKey(editKey) {
     let contentKey = '';
@@ -43,10 +43,10 @@ export default {
         contentUrlRef.once('value', (contentSnapshot) => {
           if (!contentSnapshot || !contentSnapshot.val()) return reject('Error');
 
-          const { htmlValue, msValue } = contentSnapshot.val();
-          const publishKey = contentUrlRef.key
+          const { htmlValue, mdValue } = contentSnapshot.val();
+          const id = contentUrlRef.key;
 
-          resolve({ htmlValue, mdValue, publishKey, editKey });
+          return resolve({ htmlValue, mdValue, id, editKey });
         });
       });
     });
@@ -55,13 +55,10 @@ export default {
     const ref = database.ref(`files/${documentId}`);
 
     return new Promise((resolve, reject) => {
-
       ref.once('value', (snapshot) => {
-        if (!snapshot || !snapshot.val()) {
-          reject('Error');
-          return;
-        }
-        resolve(snapshot.val().htmlValue);
+        if (!snapshot || !snapshot.val()) return reject('Error');
+
+        return resolve(snapshot.val().htmlValue);
       });
     });
   },
